@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חידת 9 המטבעות - מעבדת חשיבה אלגוריתמית</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800;900&family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        /* מטבעות */
+        .coin {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fde047 0%, #ca8a04 70%, #854d0e 100%);
+            border: 2px solid #fef08a;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-family: 'Rubik', sans-serif;
+            color: #422006;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            touch-action: none;
+        }
+
+        .coin:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 14px rgba(250, 204, 21, 0.4);
+        }
+
+        .coin:active {
+            transform: scale(0.95);
+        }
+
+        /* מנגנון מאזניים */
+        .scale-system {
+            position: relative;
+            width: 100%;
+            max-width: 540px;
+            height: 250px;
+            margin: 0 auto;
+        }
+
+        .scale-pillar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 150px;
+            background: linear-gradient(to right, #64748b, #94a3b8, #475569);
+            border-radius: 8px 8px 0 0;
+            z-index: 10;
+        }
+
+        .scale-base {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 20px;
+            background: linear-gradient(to top, #334155, #64748b);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            z-index: 11;
+        }
+
+        .scale-fulcrum {
+            position: absolute;
+            top: 65px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, #f59e0b, #b45309);
+            border-radius: 50%;
+            border: 2px solid #fef3c7;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+            z-index: 25;
+        }
+
+        .scale-beam {
+            position: absolute;
+            top: 65px;
+            left: 50%;
+            width: 380px;
+            height: 10px;
+            margin-left: -190px;
+            background: linear-gradient(to bottom, #94a3b8, #475569);
+            border-radius: 6px;
+            transform-origin: center center;
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 15;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .pan-wrapper {
+            position: absolute;
+            top: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .pan-left {
+            left: 5px;
+        }
+
+        .pan-right {
+            right: 5px;
+        }
+
+        .pan-strings {
+            width: 100px;
+            height: 45px;
+            border-left: 2px dashed #94a3b8;
+            border-right: 2px dashed #94a3b8;
+            opacity: 0.7;
+        }
+
+        .pan-plate {
+            width: 135px;
+            min-height: 60px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid #38bdf8;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 2px 6px rgba(56, 189, 248, 0.2);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 6px;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.3s;
+        }
+
+        .pan-plate.drag-over {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .coins-pool {
+            min-height: 65px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px dashed #475569;
+            border-radius: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col items-center justify-between min-h-screen">
+
+    <!-- כותרת ראשית -->
+    <header class="w-full max-w-4xl text-center mb-2">
+        <div class="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-1 border border-amber-500/30">
+            <i class="fa-solid fa-scale-balanced text-amber-400"></i>
+            <span>חשיבה אלגוריתמית • שיטת הפרד ומשול</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-black font-rubik tracking-tight text-white">
+            ⚖️ חידת 9 המטבעות והמטבע המזויף
+        </h1>
+        <p class="text-slate-300 text-xs md:text-sm mt-0.5 max-w-xl mx-auto">
+            מטבע אחד מתוך ה-9 <strong>כבד יותר</strong>. מצאו אותו ב-<strong>2 שקילות בלבד</strong>!
+        </p>
+    </header>
+
+    <main class="w-full max-w-4xl space-y-3">
+
+        <!-- סטטוס שקילות עליון -->
+        <div class="glass-card p-3 rounded-2xl flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <span class="text-xs md:text-sm text-slate-300 font-bold">שקילות שנותרו:</span>
+                <span id="weigh-counter" class="text-xl md:text-2xl font-black text-amber-400 font-rubik bg-slate-900/80 px-3 py-0.5 rounded-xl border border-amber-500/30">2</span>
+            </div>
+            <div id="status-message" class="text-xs md:text-sm font-bold text-slate-200">
+                לחצו או גררו מטבעות לכפות המאזניים, ואז לחצו "שקול כעת".
+            </div>
+            <button onclick="resetGame()" class="text-xs bg-slate-700/80 hover:bg-slate-600 px-3 py-1.5 rounded-xl transition text-slate-200 font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-rotate-right"></i> משחק חדש
+            </button>
+        </div>
+
+        <!-- אזור המאזניים והכפתורים -->
+        <div class="glass-card p-4 rounded-3xl relative overflow-hidden flex flex-col items-center">
+            
+            <div class="scale-system">
+                <div class="scale-fulcrum"></div>
+                <div class="scale-pillar"></div>
+                <div class="scale-base"></div>
+
+                <div id="scale-beam" class="scale-beam"></div>
+
+                <!-- כף ימין -->
+                <div id="wrapper-left" class="pan-wrapper pan-left">
+                    <div class="pan-strings"></div>
+                    <div id="pan-left" class="pan-plate" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'left')" ondragleave="dragLeave(event)"></div>
+                    <span class="text-[11px] font-bold text-sky-400 mt-1">כף ימין</span>
+                </div>
+
+                <!-- כף שמאל -->
+                <div id="wrapper-right" class="pan-wrapper pan-right">
+                    <div class="pan-strings"></div>
+                    <div id="pan-right" class="pan-plate" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'right')" ondragleave="dragLeave(event)"></div>
+                    <span class="text-[11px] font-bold text-sky-400 mt-1">כף שמאל</span>
+                </div>
+            </div>
+
+            <!-- פאנל כפתורי פעולה: שקול כעת + נקה כפות -->
+            <div class="mt-2 flex items-center justify-center gap-3 w-full">
+                <button id="weigh-btn" onclick="executeWeigh()" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-black font-rubik text-sm md:text-base px-7 py-2 rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition flex items-center gap-2">
+                    <i class="fa-solid fa-scale-unbalanced-flip text-slate-900"></i>
+                    <span>שקול כעת</span>
+                </button>
+                <button onclick="clearPans()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-sm px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-eraser"></i>
+                    <span>נקה כפות</span>
+                </button>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-1">טיפ: לחיצה על מטבע תשגר אותו לכף המאזניים או תחזיר אותו למאגר</div>
+
+        </div>
+
+        <!-- בריכת המטבעות הזמינים -->
+        <div class="glass-card p-3 rounded-2xl space-y-1">
+            <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-coins text-yellow-400"></i> מטבעות זמינים (לחצו לשיגור מהיר או גררו):
+            </span>
+            <div id="coins-pool" class="coins-pool" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'pool')" ondragleave="dragLeave(event)"></div>
+        </div>
+
+        <!-- פאנל בחירת המטבע המזויף -->
+        <div class="glass-card p-4 rounded-3xl border border-amber-500/30 bg-slate-900/90 text-center space-y-2">
+            <div class="text-sm font-black text-amber-300 font-rubik flex items-center justify-center gap-2">
+                <i class="fa-solid fa-bullseye text-amber-400"></i>
+                <span>זיהיתם את המטבע המזויף? בחרו אותו כאן:</span>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-1" id="guess-buttons">
+                <!-- כפתורים 1-9 דינמיים -->
+            </div>
+        </div>
+
+        <!-- היסטוריית שקילות -->
+        <div class="glass-card p-3 rounded-2xl">
+            <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5 mb-2">
+                <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i> היסטוריית שקילות:
+            </span>
+            <div id="history-log" class="space-y-1.5 text-xs text-slate-300">
+                <div class="text-slate-500 italic text-[11px]">טרם בוצעו שקילות.</div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center text-[11px] text-slate-500 my-1">
+        מעבדת אלגוריתמים • פתרון ב-2 שקילות (חלוקה ל-3 קבוצות)
+    </footer>
+
+    <script>
+        let fakeCoinIndex = Math.floor(Math.random() * 9) + 1;
+        let weighingsLeft = 2;
+        let isWeighed = false;
+        let history = [];
+
+        let coinLocations = {
+            1: 'pool', 2: 'pool', 3: 'pool',
+            4: 'pool', 5: 'pool', 6: 'pool',
+            7: 'pool', 8: 'pool', 9: 'pool'
+        };
+
+        function renderCoins() {
+            const pool = document.getElementById('coins-pool');
+            const panLeft = document.getElementById('pan-left');
+            const panRight = document.getElementById('pan-right');
+
+            pool.innerHTML = '';
+            panLeft.innerHTML = '';
+            panRight.innerHTML = '';
+
+            for (let i = 1; i <= 9; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'coin';
+                coin.id = `coin-${i}`;
+                coin.innerText = i;
+                coin.draggable = true;
+                coin.ondragstart = (e) => drag(e, i);
+                // לחיצה על מטבע לשיגור מהיר
+                coin.onclick = () => toggleCoinLocation(i);
+
+                if (coinLocations[i] === 'left') {
+                    panLeft.appendChild(coin);
+                } else if (coinLocations[i] === 'right') {
+                    panRight.appendChild(coin);
+                } else {
+                    pool.appendChild(coin);
+                }
+            }
+        }
+
+        // שיגור מהיר בלחיצה: אם במאגר -> שולח לכף הפנויה/השווה. אם על כף -> מחזיר למאגר
+        function toggleCoinLocation(coinId) {
+            const current = coinLocations[coinId];
+            if (current !== 'pool') {
+                coinLocations[coinId] = 'pool';
+            } else {
+                const leftCount = Object.values(coinLocations).filter(loc => loc === 'left').length;
+                const rightCount = Object.values(coinLocations).filter(loc => loc === 'right').length;
+                
+                // שיגור לכף שבה יש פחות מטבעות, או לימין אם שווה
+                if (leftCount <= rightCount) {
+                    coinLocations[coinId] = 'left';
+                } else {
+                    coinLocations[coinId] = 'right';
+                }
+            }
+            renderCoins();
+            resetScaleTilt();
+        }
+
+        function renderGuessButtons() {
+            const container = document.getElementById('guess-buttons');
+            container.innerHTML = '';
+            for (let i = 1; i <= 9; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 border border-slate-700 hover:border-amber-400 font-bold font-rubik text-xs md:text-sm px-3.5 py-1.5 rounded-xl transition';
+                btn.innerText = `מטבע ${i}`;
+                btn.onclick = () => submitGuess(i);
+                container.appendChild(btn);
+            }
+        }
+
+        function drag(event, coinId) {
+            event.dataTransfer.setData("text/plain", coinId);
+            if (isWeighed) {
+                resetScaleTilt();
+            }
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function dragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(event, targetLocation) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            const coinId = parseInt(event.dataTransfer.getData("text/plain"));
+
+            if (coinId >= 1 && coinId <= 9) {
+                coinLocations[coinId] = targetLocation;
+                renderCoins();
+                resetScaleTilt();
+            }
+        }
+
+        function resetScaleTilt() {
+            isWeighed = false;
+            document.getElementById('scale-beam').style.transform = 'rotate(0deg)';
+            document.getElementById('wrapper-left').style.transform = 'translateY(0px)';
+            document.getElementById('wrapper-right').style.transform = 'translateY(0px)';
+            document.getElementById('status-message').innerText = 'סדרו את המטבעות ולחצו "שקול כעת".';
+            document.getElementById('status-message').className = 'text-xs md:text-sm font-bold text-slate-200';
+        }
+
+        function clearPans() {
+            for (let i = 1; i <= 9; i++) {
+                if (coinLocations[i] !== 'pool') {
+                    coinLocations[i] = 'pool';
+                }
+            }
+            renderCoins();
+            resetScaleTilt();
+        }
+
+        function executeWeigh() {
+            if (weighingsLeft <= 0) {
+                alert('נגמרו 2 השקילות! בחרו כעת את המטבע המזויף במסך הבחירה למטה.');
+                return;
+            }
+
+            const leftCoins = Object.keys(coinLocations).filter(k => coinLocations[k] === 'left').map(Number);
+            const rightCoins = Object.keys(coinLocations).filter(k => coinLocations[k] === 'right').map(Number);
+
+            if (leftCoins.length === 0 && rightCoins.length === 0) {
+                alert('שימו מטבעות על הכפות לפני הלחיצה!');
+                return;
+            }
+
+            if (leftCoins.length !== rightCoins.length) {
+                alert('חובה לשים כמות שווה של מטבעות בכל כף לצורך שקילה!');
+                return;
+            }
+
+            let leftWeight = leftCoins.reduce((sum, id) => sum + (id === fakeCoinIndex ? 11 : 10), 0);
+            let rightWeight = rightCoins.reduce((sum, id) => sum + (id === fakeCoinIndex ? 11 : 10), 0);
+
+            const beam = document.getElementById('scale-beam');
+            const wrapLeft = document.getElementById('wrapper-left');
+            const wrapRight = document.getElementById('wrapper-right');
+            const status = document.getElementById('status-message');
+
+            weighingsLeft--;
+            document.getElementById('weigh-counter').innerText = weighingsLeft;
+            isWeighed = true;
+
+            let logOutcome = '';
+
+            if (leftWeight > rightWeight) {
+                beam.style.transform = 'rotate(-10deg)';
+                wrapLeft.style.transform = 'translateY(20px)';
+                wrapRight.style.transform = 'translateY(-20px)';
+                status.innerText = `כף ימין כבדה יותר (נוטה למטה). נשארו ${weighingsLeft} שקילות.`;
+                logOutcome = `כף ימין כבדה יותר: [${leftCoins.join(',')}] > [${rightCoins.join(',')}]`;
+                status.className = 'text-xs md:text-sm font-bold text-amber-400';
+            } else if (rightWeight > leftWeight) {
+                beam.style.transform = 'rotate(10deg)';
+                wrapLeft.style.transform = 'translateY(-20px)';
+                wrapRight.style.transform = 'translateY(20px)';
+                status.innerText = `כף שמאל כבדה יותר (נוטה למטה). נשארו ${weighingsLeft} שקילות.`;
+                logOutcome = `כף שמאל כבדה יותר: [${rightCoins.join(',')}] > [${leftCoins.join(',')}]`;
+                status.className = 'text-xs md:text-sm font-bold text-amber-400';
+            } else {
+                beam.style.transform = 'rotate(0deg)';
+                wrapLeft.style.transform = 'translateY(0px)';
+                wrapRight.style.transform = 'translateY(0px)';
+                status.innerText = `הכפות מאוזנות בשוויון מוחלט. נשארו ${weighingsLeft} שקילות.`;
+                logOutcome = `שוויון מאוזן בין [${leftCoins.join(',')}] ל-[${rightCoins.join(',')}]`;
+                status.className = 'text-xs md:text-sm font-bold text-amber-400';
+            }
+
+            const weighNum = 2 - weighingsLeft;
+            history.push(`שקילה ${weighNum}: ${logOutcome}`);
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            const container = document.getElementById('history-log');
+            if (history.length === 0) {
+                container.innerHTML = '<div class="text-slate-500 italic text-[11px]">טרם בוצעו שקילות.</div>';
+                return;
+            }
+            container.innerHTML = history.map(item => `
+                <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800 flex items-center gap-2">
+                    <span class="text-amber-400 font-bold">•</span>
+                    <span>${item}</span>
+                </div>
+            `).join('');
+        }
+
+        function submitGuess(chosenNum) {
+            if (confirm(`האם אתם בוחרים רשמית במטבע מספר ${chosenNum} כמטבע המזויף הכבד?`)) {
+                if (chosenNum === fakeCoinIndex) {
+                    alert(`🎉 כל הכבוד! מטבע מספר ${chosenNum} הוא אכן המטבע המזויף הכבד! פיצחתם את החידה בהצלחה!`);
+                } else {
+                    alert(`❌ טעות! מטבע מספר ${chosenNum} הוא מטבע רגיל. המטבע המזויף הכבד היה מספר ${fakeCoinIndex}.`);
+                }
+                resetGame();
+            }
+        }
+
+        function resetGame() {
+            fakeCoinIndex = Math.floor(Math.random() * 9) + 1;
+            weighingsLeft = 2;
+            history = [];
+            document.getElementById('weigh-counter').innerText = weighingsLeft;
+            coinLocations = { 1: 'pool', 2: 'pool', 3: 'pool', 4: 'pool', 5: 'pool', 6: 'pool', 7: 'pool', 8: 'pool', 9: 'pool' };
+            resetScaleTilt();
+            renderCoins();
+            updateHistoryUI();
+        }
+
+        window.onload = () => {
+            renderCoins();
+            renderGuessButtons();
+            updateHistoryUI();
+        };
+    </script>
+</body>
+</html>
