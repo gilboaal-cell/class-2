@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אתגר 9 המטבעות</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800;900&family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .scale-beam {
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center center;
+        }
+
+        .pan-container {
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .tilt-left-up {
+            transform: rotate(-10deg);
+        }
+        .tilt-left-up .left-pan-wrap {
+            transform: translateY(-20px);
+        }
+        .tilt-left-up .right-pan-wrap {
+            transform: translateY(20px);
+        }
+
+        .tilt-right-up {
+            transform: rotate(10deg);
+        }
+        .tilt-right-up .left-pan-wrap {
+            transform: translateY(20px);
+        }
+        .tilt-right-up .right-pan-wrap {
+            transform: translateY(-20px);
+        }
+
+        .coin-btn {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 4px 8px rgba(234, 179, 8, 0.35);
+            cursor: grab;
+        }
+        .coin-btn:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        .drop-target-active {
+            border-color: #38bdf8 !important;
+            background: rgba(56, 189, 248, 0.15) !important;
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col items-center justify-between min-h-screen">
+
+    <header class="w-full max-w-4xl text-center my-2">
+        <h1 class="text-2xl md:text-4xl font-black font-rubik tracking-tight text-white">
+            🪙 אתגר 9 המטבעות
+        </h1>
+        <p class="text-slate-300 text-xs md:text-sm mt-1 max-w-xl mx-auto">
+            מטבע אחד מזויף ושוקל פחות. מותר לבצע <strong class="text-amber-400">2 שקילות בלבד</strong> כדי למצוא אותו!
+        </p>
+    </header>
+
+    <main class="w-full max-w-4xl space-y-3 my-2">
+
+        <div class="glass-panel p-3 rounded-2xl flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <span class="text-slate-400 text-xs md:text-sm font-semibold">שקילות שנותרו:</span>
+                <div id="attempts-badges" class="flex gap-1"></div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="clearScale()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs md:text-sm font-semibold rounded-xl border border-slate-700 transition">
+                    <i class="fa-solid fa-rotate-left ml-1"></i>נקה כפות
+                </button>
+                <button onclick="resetGame()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-semibold rounded-xl transition shadow">
+                    <i class="fa-solid fa-arrows-rotate ml-1"></i>משחק חדש
+                </button>
+            </div>
+        </div>
+
+        <div class="glass-panel p-4 md:p-5 rounded-3xl flex flex-col items-center justify-center relative">
+            <div id="scale-status-text" class="text-center font-bold text-xs md:text-base mb-2 text-slate-300 min-h-[22px]">
+                גררו מטבעות לתוך כפות המאזניים
+            </div>
+
+            <div class="w-full max-w-lg relative flex flex-col items-center my-2">
+                <div class="w-5 h-24 bg-slate-600 rounded-t-md relative z-0 border-t border-slate-400 flex items-end justify-center">
+                    <div class="w-16 h-3 bg-slate-700 rounded-lg border-t border-slate-500"></div>
+                </div>
+
+                <div class="w-7 h-7 bg-amber-500 rounded-full border-2 border-white shadow-lg absolute top-0 z-20 flex items-center justify-center text-slate-950 text-xs font-black">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+
+                <div id="scale-beam" class="scale-beam w-full absolute top-2.5 left-0 z-10 flex justify-between items-center px-2">
+                    <div class="w-full h-2 bg-slate-300 rounded-full absolute left-0 top-1/2 -translate-y-1/2 shadow"></div>
+
+                    <div class="left-pan-wrap pan-container relative z-10 flex flex-col items-center">
+                        <div class="w-0.5 h-12 bg-slate-400/80"></div>
+                        <div id="left-pan" data-drop-zone="left"
+                             class="w-36 md:w-44 min-h-[64px] bg-slate-800/90 border-2 border-indigo-400/60 rounded-2xl p-2 flex flex-wrap gap-1.5 items-center justify-center shadow-inner transition">
+                            <span class="text-[10px] text-indigo-300 font-bold w-full text-center opacity-60 pointer-events-none">כף שמאל</span>
+                        </div>
+                    </div>
+
+                    <div class="right-pan-wrap pan-container relative z-10 flex flex-col items-center">
+                        <div class="w-0.5 h-12 bg-slate-400/80"></div>
+                        <div id="right-pan" data-drop-zone="right"
+                             class="w-36 md:w-44 min-h-[64px] bg-slate-800/90 border-2 border-indigo-400/60 rounded-2xl p-2 flex flex-wrap gap-1.5 items-center justify-center shadow-inner transition">
+                            <span class="text-[10px] text-indigo-300 font-bold w-full text-center opacity-60 pointer-events-none">כף ימין</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="weigh-btn" onclick="performWeighing()" class="mt-2 px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm md:text-base rounded-xl shadow-lg transition active:scale-95 flex items-center gap-2">
+                <i class="fa-solid fa-scale-unbalanced text-lg"></i>
+                <span>שקול כעת!</span>
+            </button>
+        </div>
+
+        <div class="glass-panel p-3 rounded-2xl space-y-2">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-300">
+                    <i class="fa-solid fa-coins text-amber-400 ml-1"></i> מטבעות על השולחן (ניתן לגרור או להקליק):
+                </span>
+            </div>
+
+            <div id="bench-coins" data-drop-zone="bench" class="flex flex-wrap gap-2 justify-center min-h-[50px] p-2 bg-slate-900/50 rounded-xl border border-slate-800 transition">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="glass-panel p-3 rounded-2xl space-y-1.5">
+                <h3 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i> היסטוריית שקילות
+                </h3>
+                <div id="history-list" class="space-y-1 max-h-28 overflow-y-auto pr-1 text-xs text-slate-300">
+                    <div class="text-slate-500 text-center py-2">טרם בוצעו שקילות</div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-3 rounded-2xl space-y-2 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-bullseye text-amber-400"></i> זהיתם את המזויף? בחרו אותו:
+                    </h3>
+                </div>
+
+                <div class="flex gap-2">
+                    <select id="guess-select" class="flex-grow bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-1.5 text-xs md:text-sm font-bold focus:outline-none focus:border-amber-400">
+                        <option value="">בחרו מטבע (1-9)...</option>
+                        <option value="1">מטבע 1</option>
+                        <option value="2">מטבע 2</option>
+                        <option value="3">מטבע 3</option>
+                        <option value="4">מטבע 4</option>
+                        <option value="5">מטבע 5</option>
+                        <option value="6">מטבע 6</option>
+                        <option value="7">מטבע 7</option>
+                        <option value="8">מטבע 8</option>
+                        <option value="9">מטבע 9</option>
+                    </select>
+
+                    <button onclick="submitGuess()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm rounded-xl transition">
+                        אישור!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="result-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-panel p-6 rounded-3xl max-w-sm w-full text-center space-y-3 border-2 border-amber-500/50 shadow-2xl">
+            <div id="modal-icon" class="text-4xl"></div>
+            <h2 id="modal-title" class="text-xl font-black font-rubik text-white"></h2>
+            <p id="modal-body" class="text-xs md:text-sm text-slate-300"></p>
+            <div class="pt-2">
+                <button onclick="closeModal(); resetGame();" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-sm transition">
+                    נסה שוב (מטבע חדש)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let fakeCoinIndex = 1;
+        let attemptsLeft = 2;
+        let weighingHistory = [];
+        let coinLocations = {};
+        const NORMAL_WEIGHT = 10;
+        const FAKE_WEIGHT = 7;
+
+        function initGame() {
+            fakeCoinIndex = Math.floor(Math.random() * 9) + 1;
+            attemptsLeft = 2;
+            weighingHistory = [];
+            coinLocations = {};
+            for (let i = 1; i <= 9; i++) {
+                coinLocations[i] = 'bench';
+            }
+
+            resetScaleVisual();
+            renderCoins();
+            updateAttemptsUI();
+            updateHistoryUI();
+            setupDropZones();
+
+            document.getElementById('scale-status-text').innerText = 'גררו מטבעות לתוך כפות המאזניים';
+            document.getElementById('scale-status-text').className = 'text-center font-bold text-xs md:text-base mb-2 text-slate-300 min-h-[22px]';
+            document.getElementById('guess-select').value = "";
+        }
+
+        function renderCoins() {
+            const bench = document.getElementById('bench-coins');
+            const leftPan = document.getElementById('left-pan');
+            const rightPan = document.getElementById('right-pan');
+
+            bench.innerHTML = '';
+            leftPan.innerHTML = '<span class="text-[10px] text-indigo-300 font-bold w-full text-center opacity-60 pointer-events-none">כף שמאל</span>';
+            rightPan.innerHTML = '<span class="text-[10px] text-indigo-300 font-bold w-full text-center opacity-60 pointer-events-none">כף ימין</span>';
+
+            for (let i = 1; i <= 9; i++) {
+                const loc = coinLocations[i];
+                const btn = document.createElement('div');
+                btn.draggable = true;
+                btn.id = 'coin-' + i;
+                btn.className = `coin-btn w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-amber-200 text-slate-950 font-black font-rubik text-xs md:text-sm border border-amber-100 flex items-center justify-center`;
+                btn.innerText = i;
+
+                btn.ondragstart = (e) => {
+                    e.dataTransfer.setData('text/plain', i);
+                };
+
+                btn.onclick = () => {
+                    if (coinLocations[i] === 'bench') {
+                        const leftCount = Object.values(coinLocations).filter(v => v === 'left').length;
+                        const rightCount = Object.values(coinLocations).filter(v => v === 'right').length;
+                        coinLocations[i] = (leftCount <= rightCount) ? 'left' : 'right';
+                    } else {
+                        coinLocations[i] = 'bench';
+                    }
+                    resetScaleVisual();
+                    renderCoins();
+                };
+
+                if (loc === 'bench') bench.appendChild(btn);
+                else if (loc === 'left') leftPan.appendChild(btn);
+                else if (loc === 'right') rightPan.appendChild(btn);
+            }
+        }
+
+        function setupDropZones() {
+            const zones = document.querySelectorAll('[data-drop-zone]');
+            zones.forEach(zone => {
+                zone.ondragover = (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drop-target-active');
+                };
+                zone.ondragleave = () => {
+                    zone.classList.remove('drop-target-active');
+                };
+                zone.ondrop = (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drop-target-active');
+                    const coinNum = parseInt(e.dataTransfer.getData('text/plain'));
+                    if (coinNum) {
+                        coinLocations[coinNum] = zone.getAttribute('data-drop-zone');
+                        resetScaleVisual();
+                        renderCoins();
+                    }
+                };
+            });
+        }
+
+        function clearScale() {
+            for (let i = 1; i <= 9; i++) {
+                coinLocations[i] = 'bench';
+            }
+            resetScaleVisual();
+            renderCoins();
+        }
+
+        function resetScaleVisual() {
+            const beam = document.getElementById('scale-beam');
+            beam.className = 'scale-beam w-full absolute top-2.5 left-0 z-10 flex justify-between items-center px-2';
+        }
+
+        function performWeighing() {
+            if (attemptsLeft <= 0) {
+                alert('סיימתם את 2 השקילות המותרות! בחרו כעת את המטבע המזויף.');
+                return;
+            }
+
+            const leftCoins = Object.keys(coinLocations).filter(k => coinLocations[k] === 'left').map(Number);
+            const rightCoins = Object.keys(coinLocations).filter(k => coinLocations[k] === 'right').map(Number);
+
+            if (leftCoins.length === 0 && rightCoins.length === 0) {
+                alert('שימו לפחות מטבע אחד על כפות המאזניים!');
+                return;
+            }
+
+            let leftWeight = 0;
+            leftCoins.forEach(c => {
+                leftWeight += (c === fakeCoinIndex) ? FAKE_WEIGHT : NORMAL_WEIGHT;
+            });
+
+            let rightWeight = 0;
+            rightCoins.forEach(c => {
+                rightWeight += (c === fakeCoinIndex) ? FAKE_WEIGHT : NORMAL_WEIGHT;
+            });
+
+            const beam = document.getElementById('scale-beam');
+            const statusText = document.getElementById('scale-status-text');
+            let resultText = "";
+            let resultSymbol = "";
+
+            if (leftWeight < rightWeight) {
+                beam.className = 'scale-beam w-full absolute top-2.5 left-0 z-10 flex justify-between items-center px-2 tilt-left-up';
+                resultText = 'כף שמאל קלה יותר!';
+                statusText.innerText = '⬅️ כף שמאל קלה יותר!';
+                statusText.className = 'text-center font-bold text-xs md:text-base mb-2 text-emerald-400 min-h-[22px] animate-pulse';
+                resultSymbol = 'שמאל קלה';
+            } else if (rightWeight < leftWeight) {
+                beam.className = 'scale-beam w-full absolute top-2.5 left-0 z-10 flex justify-between items-center px-2 tilt-right-up';
+                resultText = 'כף ימין קלה יותר!';
+                statusText.innerText = '➡️ כף ימין קלה יותר!';
+                statusText.className = 'text-center font-bold text-xs md:text-base mb-2 text-emerald-400 min-h-[22px] animate-pulse';
+                resultSymbol = 'ימין קלה';
+            } else {
+                beam.className = 'scale-beam w-full absolute top-2.5 left-0 z-10 flex justify-between items-center px-2';
+                resultText = 'הכפות שוות בדיוק!';
+                statusText.innerText = '⚖️ הכפות שוות בדיוק!';
+                statusText.className = 'text-center font-bold text-xs md:text-base mb-2 text-amber-300 min-h-[22px]';
+                resultSymbol = 'שוות';
+            }
+
+            attemptsLeft--;
+            updateAttemptsUI();
+
+            weighingHistory.push({
+                attemptNum: 2 - attemptsLeft,
+                left: leftCoins,
+                right: rightCoins,
+                symbol: resultSymbol
+            });
+            updateHistoryUI();
+        }
+
+        function updateAttemptsUI() {
+            const container = document.getElementById('attempts-badges');
+            container.innerHTML = '';
+            for (let i = 1; i <= 2; i++) {
+                const badge = document.createElement('span');
+                if (i <= (2 - attemptsLeft)) {
+                    badge.className = "w-6 h-6 rounded-md bg-slate-800 text-slate-500 line-through font-black flex items-center justify-center text-xs border border-slate-700";
+                } else {
+                    badge.className = "w-6 h-6 rounded-md bg-amber-500 text-slate-950 font-black flex items-center justify-center text-xs shadow";
+                }
+                badge.innerText = i;
+                container.appendChild(badge);
+            }
+
+            const weighBtn = document.getElementById('weigh-btn');
+            if (attemptsLeft <= 0) {
+                weighBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                weighBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function updateHistoryUI() {
+            const list = document.getElementById('history-list');
+            if (weighingHistory.length === 0) {
+                list.innerHTML = '<div class="text-slate-500 text-center py-2">טרם בוצעו שקילות</div>';
+                return;
+            }
+
+            list.innerHTML = '';
+            weighingHistory.forEach(h => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-900/80 p-1.5 rounded-lg border border-slate-800 flex justify-between items-center text-[11px]';
+                item.innerHTML = `
+                    <div>
+                        <strong class="text-amber-400">שקילה ${h.attemptNum}:</strong>
+                        <span>[${h.left.join(',') || 'ריק'}] מול [${h.right.join(',') || 'ריק'}]</span>
+                    </div>
+                    <span class="font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30">${h.symbol}</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function submitGuess() {
+            const val = document.getElementById('guess-select').value;
+            if (!val) {
+                alert('אנא בחרו מטבע לפני אישור!');
+                return;
+            }
+
+            const guess = parseInt(val);
+            const modal = document.getElementById('result-modal');
+            const icon = document.getElementById('modal-icon');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            if (guess === fakeCoinIndex) {
+                icon.innerHTML = '🎉';
+                title.innerText = 'מדויק! כל הכבוד!';
+                title.className = 'text-xl font-black font-rubik text-emerald-400';
+                body.innerHTML = `מטבע <strong>#${fakeCoinIndex}</strong> הוא אכן המטבע המזויף והקל!`;
+            } else {
+                icon.innerHTML = '❌';
+                title.innerText = 'פספוס...';
+                title.className = 'text-xl font-black font-rubik text-rose-400';
+                body.innerHTML = `בחרתם במטבע #${guess}, אך המזויף האמיתי היה <strong>#${fakeCoinIndex}</strong>.`;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.add('hidden');
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
