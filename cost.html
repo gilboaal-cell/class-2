@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דילמת העלות השקועה - TalkMax</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800;900&family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .timer-glow {
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+        }
+
+        .timer-urgent {
+            color: #ef4444 !important;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center min-h-screen">
+
+    <div class="glass-card w-full max-w-3xl rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+        
+        <!-- כותרת ראשית -->
+        <header class="text-center space-y-2 border-b border-slate-700/60 pb-4">
+            <div class="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 px-4 py-1 rounded-full text-xs md:text-sm font-semibold border border-amber-500/30">
+                <i class="fa-solid fa-brain"></i>
+                <span>תורת ההחלטות • פסיכולוגיה של משקיעים</span>
+            </div>
+            <h1 class="text-2xl md:text-4xl font-black font-rubik tracking-tight text-white">
+                דילמת "העלות השקועה" • חברת TalkMax
+            </h1>
+        </header>
+
+        <!-- מסך 1: שלב המקרה והטיימר -->
+        <div id="case-study-screen" class="space-y-6">
+            
+            <!-- תיאור המקרה -->
+            <div class="bg-slate-900/70 p-5 rounded-2xl border border-slate-700 space-y-3 leading-relaxed text-sm md:text-base text-slate-200">
+                <p>
+                    חברת <strong>"TalkMax"</strong> השיקה פרויקט לפיתוח וייצור ליין כיסויי סמארטפון מעוצבים.  
+                    נכון להיום, <strong>השקעתם כבר 9,000 ₪</strong> בפרויקט.
+                </p>
+                <p>
+                    הפרויקט כמעט מוכן: כל הכיסויים הודפסו, וכדי שיהיה אפשר להתחיל למכור נשאר רק לקנות את אריזות המגן השקופות ב-<strong>1,000 ₪ אחרונים</strong>.
+                </p>
+                <div class="p-3 bg-red-950/40 border-r-4 border-red-500 rounded-lg text-slate-300 text-xs md:text-sm">
+                    <strong>⚠️ התפתחות דרמטית:</strong> חברה מתחרה (SmartTouch) השיקה כיסויים כמעט זהים במסגרת מבצע קידום למכשיר החדש שלה, והיא <strong>מחלקת אותם בחינם</strong> לכל קונה!
+                </div>
+            </div>
+
+            <!-- אזור טיימר דיון -->
+            <div class="flex flex-col items-center justify-center p-4 bg-slate-950/50 rounded-2xl border border-slate-800 space-y-2">
+                <div class="text-xs md:text-sm text-slate-400 font-bold">זמן דיון קבוצתי להכרעה:</div>
+                <div id="timer-display" class="text-4xl md:text-5xl font-black font-rubik timer-glow text-amber-400">
+                    05:00
+                </div>
+                <button id="start-timer-btn" onclick="startTimer()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-1.5 rounded-xl border border-slate-600 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-play"></i> התחל 5 דקות דיון
+                </button>
+            </div>
+
+            <!-- 2 כפתורי הכרעה -->
+            <div class="space-y-3 pt-2">
+                <div class="text-center text-xs md:text-sm font-bold text-slate-300">
+                    מה הצוות שלכם מחליט לעשות עכשיו?
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <button onclick="handleDecision('continue')" class="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-2xl font-bold font-rubik text-base text-white shadow-lg shadow-blue-500/20 active:scale-95 transition flex flex-col items-center justify-center gap-1 border border-blue-400/30">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-forward-step"></i> המשך השקעה
+                        </span>
+                        <span class="text-xs font-normal text-blue-100">להוציא את ה-1,000 ₪ האחרונים ולהשלים את הפרויקט</span>
+                    </button>
+
+                    <button onclick="handleDecision('stop')" class="p-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 rounded-2xl font-bold font-rubik text-base text-white shadow-lg shadow-red-500/20 active:scale-95 transition flex flex-col items-center justify-center gap-1 border border-red-400/30">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-hand"></i> עצירה מיידית
+                        </span>
+                        <span class="text-xs font-normal text-red-100">לעצור את הפרויקט עכשיו ולא להוציא עוד שקל</span>
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- מסך 2: חשיפת התוצאה (מוסתר בהתחלה) -->
+        <div id="outcome-screen" class="hidden space-y-6">
+            
+            <div id="outcome-box" class="p-6 rounded-2xl border text-center space-y-4">
+                <div id="outcome-icon" class="text-5xl"></div>
+                <h2 id="outcome-title" class="text-xl md:text-2xl font-black font-rubik"></h2>
+                <p id="outcome-text" class="text-base md:text-lg leading-relaxed text-slate-100 font-medium"></p>
+            </div>
+
+            <!-- לקח פדגוגי מהיר -->
+            <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 text-xs md:text-sm text-slate-300 space-y-1.5">
+                <span class="font-bold text-amber-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-lightbulb"></i> הלקח הכלכלי (עלות שקועה):
+                </span>
+                <p>
+                    ה-9,000 ₪ שהושקעו בעבר כבר "שקעו" – שום החלטה לא תחזיר אותם.  
+                    כשמקבלים החלטה מסתכלים רק קדימה: האם שווה להוציא 1,000 ₪ כדי לקבל 200 ₪? חד-משמעית לא!
+                </p>
+            </div>
+
+            <div class="text-center pt-2">
+                <button onclick="resetSimulator()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-bold px-6 py-2.5 rounded-xl transition flex items-center gap-2 mx-auto">
+                    <i class="fa-solid fa-rotate-right"></i> התחל את התרגיל מחדש
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let timeLeft = 300; // 5 דקות בשניות
+        let timerInterval = null;
+
+        function updateTimerUI() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = document.getElementById('timer-display');
+            display.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            if (timeLeft <= 60 && timeLeft > 0) {
+                display.classList.add('timer-urgent');
+            } else {
+                display.classList.remove('timer-urgent');
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            const btn = document.getElementById('start-timer-btn');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerUI();
+                } else {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    document.getElementById('timer-display').innerText = "00:00 - הזמן עבר!";
+                }
+            }, 1000);
+        }
+
+        function handleDecision(decision) {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            document.getElementById('case-study-screen').classList.add('hidden');
+            const outcomeScreen = document.getElementById('outcome-screen');
+            outcomeScreen.classList.remove('hidden');
+
+            const outcomeBox = document.getElementById('outcome-box');
+            const outcomeIcon = document.getElementById('outcome-icon');
+            const outcomeTitle = document.getElementById('outcome-title');
+            const outcomeText = document.getElementById('outcome-text');
+
+            if (decision === 'continue') {
+                // בחירה בהמשך השקעה
+                outcomeBox.className = "p-6 rounded-2xl border border-red-500/50 bg-red-950/40 text-center space-y-4";
+                outcomeIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-400"></i>`;
+                outcomeTitle.className = "text-xl md:text-2xl font-black font-rubik text-red-300";
+                outcomeTitle.innerText = "נפלתם במלכודת העלות השקועה!";
+                outcomeText.innerText = "בסיפור שלנו הצלחתם למכור את מלאי הכיסויים שלכם ב-200 ש\"ח בלבד והפסדתם 9,800 ש\"ח סך הכל.";
+            } else {
+                // בחירה בעצירה מיידית
+                outcomeBox.className = "p-6 rounded-2xl border border-emerald-500/50 bg-emerald-950/40 text-center space-y-4";
+                outcomeIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i>`;
+                outcomeTitle.className = "text-xl md:text-2xl font-black font-rubik text-emerald-300";
+                outcomeTitle.innerText = "כל הכבוד על החשיבה הרציונלית!";
+                outcomeText.innerText = "אומנם הפסדתם 9,000 ש\"ח אבל גיליתם שאם הייתם מחליטים להשקיע את ה-1,000 הנוספים הייתם מצליחים למכור כיסויים בשווי של 200 ש\"ח בלבד כלומר מגדילים את ההפסד ל-9,800. קיבלתם את ההחלטה הקשה אך הנכונה!";
+            }
+        }
+
+        function resetSimulator() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            timeLeft = 300;
+            updateTimerUI();
+            
+            const btn = document.getElementById('start-timer-btn');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            document.getElementById('outcome-screen').classList.add('hidden');
+            document.getElementById('case-study-screen').classList.remove('hidden');
+        }
+
+        window.onload = () => {
+            updateTimerUI();
+        };
+    </script>
+</body>
+</html>
