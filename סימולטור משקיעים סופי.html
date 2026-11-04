@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>טורניר המשקיעים הגדול - מרוץ החיסכון לגיל 40</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800;900&family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        input[type=range] {
+            accent-color: #f59e0b;
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col items-center justify-between min-h-screen">
+
+    <header class="w-full max-w-6xl text-center my-2">
+        <div class="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-2 border border-amber-500/30">
+            <i class="fa-solid fa-trophy text-amber-400"></i>
+            <span>קרב 3 המשקיעים • ריבית שנתית 10%</span>
+        </div>
+        <h1 class="text-2xl md:text-4xl font-black font-rubik tracking-tight text-white">
+            🚀 מכונת הזמן של הכסף: מי ינצח בגיל 40?
+        </h1>
+        <p class="text-slate-300 text-xs md:text-sm mt-1 max-w-2xl mx-auto">
+            הזיזו את סרגל השנים וגלו בזמן אמת איך שיטות השקעה שונות מייצרות תוצאות מפתיעות!
+        </p>
+    </header>
+
+    <main class="w-full max-w-6xl space-y-4 my-2">
+
+        <div class="glass-panel glass-card p-4 rounded-3xl text-center space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <span class="text-slate-300 text-xs md:text-sm font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-400"></i> גררו את השנים קדימה:
+                </span>
+                <div class="bg-slate-900/90 border border-amber-500/40 px-4 py-1.5 rounded-2xl">
+                    <span class="text-xs text-slate-400">הגיל שנבחר: </span>
+                    <span id="age-display" class="text-2xl md:text-3xl font-black text-amber-400 font-rubik">גיל 15</span>
+                </div>
+            </div>
+
+            <input type="range" id="time-slider" min="15" max="40" value="15" step="1" 
+                   class="w-full h-3.5 bg-slate-800 rounded-lg appearance-none cursor-pointer border border-slate-700"
+                   oninput="updateSimulation(this.value)">
+
+            <div class="flex justify-between text-[11px] text-slate-400 font-semibold px-1">
+                <span>גיל 15 (רוני מתחיל)</span>
+                <span>גיל 25 (רוני מסיים / עידו מתחיל)</span>
+                <span>גיל 30 (משה מתחיל)</span>
+                <span class="text-amber-400 font-bold">גיל 40 (היעד)</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+            <!-- רוני -->
+            <div class="glass-card p-4 rounded-3xl border-t-4 border-emerald-500 flex flex-col justify-between space-y-3">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="bg-emerald-500/20 text-emerald-300 text-[10px] px-2.5 py-0.5 rounded-full font-bold">התחיל ב-15 והפסיק ב-25 ⚡</span>
+                        <span class="text-xl">🏃</span>
+                    </div>
+                    <h2 class="text-lg font-black font-rubik text-white">רוני המוקדם</h2>
+                    <p class="text-slate-300 text-xs mt-1">200 ₪ בחודש למשך 10 שנים בלבד.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800 text-[11px]">
+                        <span class="text-slate-400">השקעה מהכיס: </span>
+                        <strong class="text-slate-200" id="pocket-roni">0 ₪</strong>
+                    </div>
+
+                    <div class="bg-emerald-950/50 p-2.5 rounded-2xl border border-emerald-500/40">
+                        <div class="text-[10px] text-emerald-300 font-semibold">שווי בחשבון:</div>
+                        <div id="val-roni" class="text-xl md:text-2xl font-black text-emerald-400 font-rubik">0 ₪</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- עידו -->
+            <div class="glass-card p-4 rounded-3xl border-t-4 border-orange-500 flex flex-col justify-between space-y-3">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="bg-orange-500/20 text-orange-300 text-[10px] px-2.5 py-0.5 rounded-full font-bold">מגיל 25 עד 40 🐢</span>
+                        <span class="text-xl">🧑‍💼</span>
+                    </div>
+                    <h2 class="text-lg font-black font-rubik text-white">עידו המתמיד</h2>
+                    <p class="text-slate-300 text-xs mt-1">200 ₪ בחודש ברצף במשך 15 שנה.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800 text-[11px]">
+                        <span class="text-slate-400">השקעה מהכיס: </span>
+                        <strong class="text-slate-200" id="pocket-ido">0 ₪</strong>
+                    </div>
+
+                    <div class="bg-orange-950/50 p-2.5 rounded-2xl border border-orange-500/40">
+                        <div class="text-[10px] text-orange-300 font-semibold">שווי בחשבון:</div>
+                        <div id="val-ido" class="text-xl md:text-2xl font-black text-orange-400 font-rubik">0 ₪</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- משה -->
+            <div class="glass-card p-4 rounded-3xl border-t-4 border-blue-500 flex flex-col justify-between space-y-3">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="bg-blue-500/20 text-blue-300 text-[10px] px-2.5 py-0.5 rounded-full font-bold">מגיל 30 עד 40 (סכום כפול) 💰</span>
+                        <span class="text-xl">👨‍💻</span>
+                    </div>
+                    <h2 class="text-lg font-black font-rubik text-white">משה המפצה</h2>
+                    <p class="text-slate-300 text-xs mt-1">400 ₪ בחודש ברצף במשך 10 שנים.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800 text-[11px]">
+                        <span class="text-slate-400">השקעה מהכיס: </span>
+                        <strong class="text-slate-200" id="pocket-moshe">0 ₪</strong>
+                    </div>
+
+                    <div class="bg-blue-950/50 p-2.5 rounded-2xl border border-blue-500/40">
+                        <div class="text-[10px] text-blue-300 font-semibold">שווי בחשבון:</div>
+                        <div id="val-moshe" class="text-xl md:text-2xl font-black text-blue-400 font-rubik">0 ₪</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="glass-card p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-center">
+            <span class="text-xs md:text-sm text-slate-200" id="dynamic-insight">
+                גררו את הסרגל לגיל 40 כדי לראות את התוצאות הסופיות של כולם!
+            </span>
+        </div>
+
+        <div class="glass-card p-4 rounded-3xl">
+            <h3 class="text-xs md:text-sm font-bold text-slate-200 mb-2 text-center">
+                📈 מרוץ הצמיחה לאורך השנים (ריבית 10% שנתית)
+            </h3>
+            <div class="h-64 md:h-72 w-full relative">
+                <canvas id="investorsChart"></canvas>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center text-[11px] text-slate-500 my-2">
+        תוכנית אימפקט • מעבדת ערך הזמן של הכסף וריבית דריבית
+    </footer>
+
+    <script>
+        const ANNUAL_RATE = 0.10;
+        const MONTHLY_RATE = Math.pow(1 + ANNUAL_RATE, 1/12) - 1;
+
+        function calcMonthlyStream(pmt, startAge, endDepositAge, currentAge) {
+            if (currentAge < startAge) return 0;
+            const stopAge = Math.min(currentAge, endDepositAge);
+            const depositMonths = (stopAge - startAge) * 12;
+            let total = 0;
+
+            for (let i = 0; i < depositMonths; i++) {
+                total = (total + pmt) * (1 + MONTHLY_RATE);
+            }
+
+            if (currentAge > endDepositAge) {
+                const growthMonths = (currentAge - endDepositAge) * 12;
+                total = total * Math.pow(1 + MONTHLY_RATE, growthMonths);
+            }
+
+            return Math.round(total);
+        }
+
+        function formatILS(num) {
+            return new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 }).format(num);
+        }
+
+        function getRoni(age) { return calcMonthlyStream(200, 15, 25, age); }
+        function getIdo(age) { return calcMonthlyStream(200, 25, 40, age); }
+        function getMoshe(age) { return calcMonthlyStream(400, 30, 40, age); }
+
+        let chart;
+        function initChart() {
+            const ctx = document.getElementById('investorsChart').getContext('2d');
+            const labels = [];
+            const roniData = [], idoData = [], mosheData = [];
+
+            for (let age = 15; age <= 40; age++) {
+                labels.push('גיל ' + age);
+                roniData.push(getRoni(age));
+                idoData.push(getIdo(age));
+                mosheData.push(getMoshe(age));
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'רוני (24k מהכיס)', data: roniData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', borderWidth: 3, tension: 0.3 },
+                        { label: 'עידו (36k מהכיס)', data: idoData, borderColor: '#f97316', backgroundColor: 'transparent', borderWidth: 2.5, tension: 0.3 },
+                        { label: 'משה (48k מהכיס)', data: mosheData, borderColor: '#3b82f6', backgroundColor: 'transparent', borderWidth: 2.5, tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc', font: { family: 'Heebo', size: 12 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { 
+                            ticks: { 
+                                color: '#94a3b8', 
+                                font: { size: 10 },
+                                callback: val => (val >= 1000 ? (val/1000).toFixed(0) + 'k ₪' : val + ' ₪')
+                            }, 
+                            grid: { color: 'rgba(255,255,255,0.05)' } 
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSimulation(age) {
+            age = parseInt(age);
+            document.getElementById('age-display').innerText = 'גיל ' + age;
+
+            const roniVal = getRoni(age);
+            const idoVal = getIdo(age);
+            const mosheVal = getMoshe(age);
+
+            document.getElementById('val-roni').innerText = formatILS(roniVal);
+            document.getElementById('val-ido').innerText = formatILS(idoVal);
+            document.getElementById('val-moshe').innerText = formatILS(mosheVal);
+
+            const roniSpent = (Math.min(age, 25) - 15) * 12 * 200;
+            const idoSpent = age >= 25 ? (Math.min(age, 40) - 25) * 12 * 200 : 0;
+            const mosheSpent = age >= 30 ? (Math.min(age, 40) - 30) * 12 * 400 : 0;
+
+            document.getElementById('pocket-roni').innerText = formatILS(roniSpent);
+            document.getElementById('pocket-ido').innerText = formatILS(idoSpent);
+            document.getElementById('pocket-moshe').innerText = formatILS(mosheSpent);
+
+            const insight = document.getElementById('dynamic-insight');
+            if (age < 25) {
+                insight.innerHTML = "רוני מפקיד 200 ₪ בחודש וצובר יתרון עצום מוקדם בזמן ששאר המשקיעים עדיין לא התחילו!";
+            } else if (age < 30) {
+                insight.innerHTML = "רוני הפסיק להפקיד לחלוטין! עידו מתחיל להפקיד, אך הכסף של רוני כבר עובד בריבית דריבית ומגדיל את הפער.";
+            } else if (age < 40) {
+                insight.innerHTML = "משה מפקיד 400 ₪ בחודש (פי 2 מרוני!) — אך האם הוא ועידו יצליחו להדביק את הפער מרוני?";
+            } else {
+                insight.innerHTML = `🏆 <strong>בגיל 40:</strong> רוני המנצח הבלתי מעורער עם <strong>${formatILS(roniVal)}</strong> (מתוך 24,000 ₪ בלבד מהכיס)! עידו השקיע <strong>36,000 ₪</strong> והגיע ל-<strong>${formatILS(idoVal)}</strong>, ומשה השקיע <strong>48,000 ₪</strong> (פי 2 מרוני!) והגיע רק ל-<strong>${formatILS(mosheVal)}</strong>. <strong>מסקנה: הזמן מנצח את כמות הכסף!</strong>`;
+            }
+        }
+
+        window.onload = function() {
+            initChart();
+            updateSimulation(15);
+        };
+    </script>
+</body>
+</html>
