@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אתגר תזמון השוק - מניית "עכשיו זה הזמן"</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800;900&family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col items-center justify-between min-h-screen">
+
+    <!-- כותרת ראשית -->
+    <header class="w-full max-w-5xl text-center mb-3">
+        <div class="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-2 border border-indigo-500/30">
+            <i class="fa-solid fa-chart-line text-indigo-400"></i>
+            <span>סימולטור מסחר אישי • מניית "עכשיו זה הזמן" (AZH)</span>
+        </div>
+        <h1 class="text-2xl md:text-4xl font-black font-rubik tracking-tight text-white">
+            ⏱️ אתגר תזמון השוק: נהלו את התיק שלכם!
+        </h1>
+        <p class="text-slate-300 text-xs md:text-sm mt-1">
+            התחלתם עם תקציב של 1,000 ₪. בכל שלב החליטו מתי לקנות, מתי למכור וכמה להשקיע!
+        </p>
+    </header>
+
+    <main class="w-full max-w-5xl space-y-4">
+
+        <!-- סטטוס שוק ונתוני שנה -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="glass-card p-4 rounded-3xl text-center border-t-4 border-indigo-500">
+                <div class="text-xs text-slate-400 font-semibold">שנה נוכחית</div>
+                <div id="current-year-display" class="text-2xl md:text-3xl font-black text-indigo-400 font-rubik mt-1">נקודת ההתחלה (שנה 0)</div>
+            </div>
+
+            <div class="glass-card p-4 rounded-3xl text-center border-t-4 border-amber-500">
+                <div class="text-xs text-slate-400 font-semibold">מחיר מניה בודדת</div>
+                <div id="current-price-display" class="text-2xl md:text-3xl font-black text-amber-400 font-rubik mt-1">100.00 ₪</div>
+            </div>
+        </div>
+
+        <!-- פאנל מצב החשבון האישי של התלמיד -->
+        <div class="glass-card p-4 rounded-3xl border border-slate-700/80 bg-slate-900/80">
+            <div class="text-xs font-bold text-slate-300 mb-3 flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-wallet text-emerald-400"></i> תיק ההשקעות האישי שלי</span>
+                <span class="text-[11px] text-slate-400">תקציב התחלתי: 1,000 ₪</span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                    <span class="text-[11px] text-slate-400 block">מזומן חופשי</span>
+                    <strong id="user-cash" class="text-lg font-black text-emerald-400 font-rubik">1,000 ₪</strong>
+                </div>
+                <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                    <span class="text-[11px] text-slate-400 block">כמות מניות</span>
+                    <strong id="user-shares" class="text-lg font-black text-indigo-300 font-rubik">0</strong>
+                </div>
+                <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+                    <span class="text-[11px] text-slate-400 block">שווי מניות נוכחי</span>
+                    <strong id="user-stock-value" class="text-lg font-black text-amber-400 font-rubik">0 ₪</strong>
+                </div>
+                <div class="bg-slate-800/80 p-3 rounded-2xl border border-indigo-500/40 bg-indigo-950/20">
+                    <span class="text-[11px] text-slate-400 block">סך שווי התיק הכולל</span>
+                    <strong id="user-total-value" class="text-lg font-black text-white font-rubik">1,000 ₪</strong>
+                </div>
+            </div>
+
+            <!-- מחשבון פעולות מסחר: קנייה / מכירה -->
+            <div class="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <label for="trade-shares" class="text-xs text-slate-300 font-semibold">כמות מניות לפעולה:</label>
+                    <input type="number" id="trade-shares" min="1" value="1" step="1" 
+                           class="w-20 bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1 text-center text-sm font-bold text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="buyShares()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1 transition">
+                        <i class="fa-solid fa-plus"></i> קנה מניות
+                    </button>
+                    <button onclick="buyMax()" class="bg-emerald-800/70 hover:bg-emerald-700 text-emerald-200 font-bold px-2.5 py-1.5 rounded-xl text-[11px] border border-emerald-600/40 transition">
+                        קנה הכל במזומן
+                    </button>
+                    <button onclick="sellShares()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1 transition">
+                        <i class="fa-solid fa-minus"></i> מכור מניות
+                    </button>
+                    <button onclick="sellAll()" class="bg-rose-800/70 hover:bg-rose-700 text-rose-200 font-bold px-2.5 py-1.5 rounded-xl text-[11px] border border-rose-600/40 transition">
+                        מכור את כל המניות
+                    </button>
+                </div>
+            </div>
+            <div id="trade-msg" class="text-[11px] text-amber-300 mt-2 min-h-[16px] text-center"></div>
+        </div>
+
+        <!-- מבזק חדשות השנה -->
+        <div class="glass-card p-4 rounded-3xl border border-slate-700/80 bg-slate-900/60 text-center space-y-2">
+            <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <i class="fa-solid fa-newspaper text-amber-400"></i> מבזק חדשות כלכלי
+            </div>
+            <div id="news-headline" class="text-base md:text-lg font-bold text-white">
+                החברה השלימה גיוס הון ראשוני ונכנסת לבורסה במחיר של 100 ₪ למניה. קבלו החלטת השקעה!
+            </div>
+            <div id="change-tag" class="inline-block text-xs font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-300">
+                שינוי בשנה זו: 0%
+            </div>
+        </div>
+
+        <!-- כפתורי שליטה במצגת/שנים -->
+        <div class="flex flex-wrap justify-center gap-3">
+            <button id="next-btn" onclick="nextYear()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2.5 rounded-2xl text-sm shadow-lg shadow-indigo-600/30 transition duration-150 flex items-center gap-2">
+                <span>חשוף את השנה הבאה</span>
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <button onclick="resetGame()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-2xl text-sm border border-slate-700 transition">
+                איפוס משחק
+            </button>
+        </div>
+
+        <!-- גרף המניה -->
+        <div class="glass-card p-4 rounded-3xl">
+            <h3 class="text-xs md:text-sm font-bold text-slate-200 mb-2 text-center">
+                📊 גרף מניית "עכשיו זה הזמן" (התפתחות לאורך 10 שנים)
+            </h3>
+            <div class="h-64 md:h-72 w-full relative">
+                <canvas id="stockChart"></canvas>
+            </div>
+        </div>
+
+        <!-- מסר מסכם אישי מול קנה והחזק -->
+        <div id="summary-banner" class="hidden glass-card p-5 rounded-3xl border-2 border-emerald-500 bg-emerald-950/40 text-center space-y-3">
+            <h3 class="text-xl font-black text-emerald-400 font-rubik">🏆 סיום 10 שנות המסחר: שעת המבחן!</h3>
+            <p class="text-sm md:text-base text-slate-200 max-w-2xl mx-auto leading-relaxed" id="summary-text"></p>
+        </div>
+
+    </main>
+
+    <footer class="text-center text-[11px] text-slate-500 my-2">
+        מעבדת שוק ההון • תזמון שוק מול השקעה עקבית לטווח ארוך
+    </footer>
+
+    <script>
+        const yearsData = [
+            { year: 0, price: 100, change: 0, news: "החברה הונפקה בבורסה במחיר של 100 ₪ למניה. קבלו החלטה: לקנות או לחכות במזומן?" },
+            { year: 1, price: 125, change: 25, news: "🚀 שנה 1: החברה משיקה מוצר מוביל ומציגה רווחי שיא! המניה מזנקת ב-25%." },
+            { year: 2, price: 145, change: 16, news: "📈 שנה 2: התרחבות לשווקים בינלאומיים. המניה ממשיכה לעלות ב-16% נוספים." },
+            { year: 3, price: 95, change: -34.5, news: "💥 שנה 3: משבר פיננסי עולמי ואינפלציה! המניה מתרסקת ב-34.5% ונופלת מתחת למחיר הפתיחה!" },
+            { year: 4, price: 110, change: 15.8, news: "🌱 שנה 4: התאוששות ראשונית וצמצום הוצאות בחברה. עלייה של כ-16%." },
+            { year: 5, price: 150, change: 36.4, news: "⚡ שנה 5: חתימת חוזה ענק עם ממשלת ארה\"ב! זינוק מרשים של 36%." },
+            { year: 6, price: 190, change: 26.7, news: "🔥 שנה 6: טרנד הבינה המלאכותית מקפיץ את כל מגזר הטכנולוגיה. עלייה של 27%." },
+            { year: 7, price: 135, change: -28.9, news: "📉 שנה 7: שמועות על מיתון והעלאת ריבית חדה במשק. נפילה מלחיצה של כ-29%!" },
+            { year: 8, price: 180, change: 33.3, news: "💎 שנה 8: השקת שבב פורץ דרך והחזרת אמון המשקיעים. עלייה של 33%." },
+            { year: 9, price: 260, change: 44.4, news: "🚀 שנה 9: רכישת חברה מתחרה והכפלת הרווח הנקי. זינוק אדיר של 44%." },
+            { year: 10, price: 380, change: 46.1, news: "👑 שנה 10: דוחות סוף עשור שוברים כל תחזית אפשרית! עלייה של 46% והגעה לשיא כל הזמנים!" }
+        ];
+
+        let currentStep = 0;
+        let chart;
+
+        // מצב תיק אישי
+        let userCash = 1000;
+        let userShares = 0;
+
+        function formatILS(num) {
+            return new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 2 }).format(num);
+        }
+
+        function getCurrentPrice() {
+            return yearsData[currentStep].price;
+        }
+
+        function updatePortfolioDisplay() {
+            const price = getCurrentPrice();
+            const stockVal = userShares * price;
+            const totalVal = userCash + stockVal;
+
+            document.getElementById('user-cash').innerText = formatILS(userCash);
+            document.getElementById('user-shares').innerText = userShares;
+            document.getElementById('user-stock-value').innerText = formatILS(stockVal);
+            document.getElementById('user-total-value').innerText = formatILS(totalVal);
+        }
+
+        function showMsg(msg) {
+            const el = document.getElementById('trade-msg');
+            el.innerText = msg;
+            setTimeout(() => { if (el.innerText === msg) el.innerText = ""; }, 4000);
+        }
+
+        function buyShares() {
+            const countInput = document.getElementById('trade-shares');
+            const count = parseInt(countInput.value) || 0;
+            if (count <= 0) {
+                showMsg("יש להזין כמות תקינה של מניות.");
+                return;
+            }
+            const price = getCurrentPrice();
+            const totalCost = count * price;
+
+            if (totalCost > userCash) {
+                showMsg(`אין מספיק מזומן! נדרש ${formatILS(totalCost)}, אך יש לך רק ${formatILS(userCash)}.`);
+                return;
+            }
+
+            userCash -= totalCost;
+            userShares += count;
+            showMsg(`נרכשו ${count} מניות במחיר של ${formatILS(price)} כל אחת.`);
+            updatePortfolioDisplay();
+        }
+
+        function buyMax() {
+            const price = getCurrentPrice();
+            const maxShares = Math.floor(userCash / price);
+            if (maxShares <= 0) {
+                showMsg("אין מספיק מזומן לרכישת מניה אחת.");
+                return;
+            }
+            userCash -= maxShares * price;
+            userShares += maxShares;
+            showMsg(`נרכשו מקסימום ${maxShares} מניות בסך ${formatILS(maxShares * price)}.`);
+            updatePortfolioDisplay();
+        }
+
+        function sellShares() {
+            const countInput = document.getElementById('trade-shares');
+            const count = parseInt(countInput.value) || 0;
+            if (count <= 0) {
+                showMsg("יש להזין כמות תקינה של מניות.");
+                return;
+            }
+            if (count > userShares) {
+                showMsg(`אין לך מספיק מניות למכירה! ברשותך ${userShares} מניות.`);
+                return;
+            }
+
+            const price = getCurrentPrice();
+            const revenue = count * price;
+            userShares -= count;
+            userCash += revenue;
+            showMsg(`נמכרו ${count} מניות במחיר של ${formatILS(price)} כל אחת.`);
+            updatePortfolioDisplay();
+        }
+
+        function sellAll() {
+            if (userShares <= 0) {
+                showMsg("אין מניות בתיק למכירה.");
+                return;
+            }
+            const price = getCurrentPrice();
+            const revenue = userShares * price;
+            const soldCount = userShares;
+            userShares = 0;
+            userCash += revenue;
+            showMsg(`נמכרו כל ${soldCount} המניות בסך ${formatILS(revenue)}.`);
+            updatePortfolioDisplay();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['שנה 0'],
+                    datasets: [{
+                        label: 'מחיר מניית "עכשיו זה הזמן" (₪)',
+                        data: [100],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.25,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#818cf8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc', font: { family: 'Heebo', size: 12 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { 
+                            min: 50,
+                            max: 420,
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: val => val + ' ₪'
+                            }, 
+                            grid: { color: 'rgba(255,255,255,0.05)' } 
+                        }
+                    }
+                }
+            });
+        }
+
+        function nextYear() {
+            if (currentStep >= 10) return;
+            currentStep++;
+
+            const current = yearsData[currentStep];
+
+            // עדכון מחיר ושנה
+            document.getElementById('current-year-display').innerText = `שנה ${current.year}`;
+            document.getElementById('current-price-display').innerText = `${current.price.toFixed(2)} ₪`;
+            document.getElementById('news-headline').innerText = current.news;
+
+            const changeTag = document.getElementById('change-tag');
+            if (current.change > 0) {
+                changeTag.className = "inline-block text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+                changeTag.innerText = `שינוי בשנה זו: +${current.change}% 📈`;
+            } else if (current.change < 0) {
+                changeTag.className = "inline-block text-xs font-bold px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40";
+                changeTag.innerText = `שינוי בשנה זו: ${current.change}% 📉`;
+            } else {
+                changeTag.className = "inline-block text-xs font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-300";
+                changeTag.innerText = `שינוי בשנה זו: 0%`;
+            }
+
+            // עדכון הגרף
+            chart.data.labels.push(`שנה ${current.year}`);
+            chart.data.datasets[0].data.push(current.price);
+            chart.data.datasets[0].borderColor = current.change < 0 ? '#f43f5e' : '#10b981';
+            chart.update();
+
+            // עדכון שווי תיק לפי המחיר החדש של השנה שנחשפה
+            updatePortfolioDisplay();
+
+            // סיום משחק בשנה 10
+            if (currentStep === 10) {
+                document.getElementById('next-btn').disabled = true;
+                document.getElementById('next-btn').classList.add('opacity-50', 'cursor-not-allowed');
+                showSummary();
+            }
+        }
+
+        function showSummary() {
+            const finalPrice = 380;
+            const passiveHoldVal = 10 * finalPrice; // מי שקנה ב-1,000 ש"ח 10 מניות בשנה 0
+            const userTotalVal = userCash + (userShares * finalPrice);
+            const summaryBanner = document.getElementById('summary-banner');
+            const summaryText = document.getElementById('summary-text');
+
+            summaryBanner.classList.remove('hidden');
+            summaryText.innerHTML = `
+                תיק ההשקעות האישי שלכם סיים עם סך כולל של <strong class="text-amber-400 text-lg">${formatILS(userTotalVal)}</strong>.<br>
+                לעומת זאת, מי שקנה בשנה 0 עשר מניות ב-1,000 ₪ ופשוט <strong>החזיק בסבלנות בלי לנסות לתזמן</strong> — הגיע ל-<strong class="text-emerald-400 text-lg">${formatILS(passiveHoldVal)}</strong> (רווח של 280%!).<br><br>
+                ${userTotalVal < passiveHoldVal 
+                    ? '⚠️ <strong>ראיתם מה קרה?</strong> הניסיון לברוח בירידות ולקנות בעליות גרם לכם לפספס את הזינוקים ולהישאר מאחור!' 
+                    : '🌟 הצלחתם לנחש יפה את התנודות, אך במציאות כמעט בלתי אפשרי לחזור על כך בעקביות לאורך עשרות שנים.'}<br>
+                💡 <strong>המסקנה:</strong> <em>Time in the Market beats Timing the Market</em> — זמן וסבלנות מנצחים ניסיונות לתזמן את השוק!
+            `;
+        }
+
+        function resetGame() {
+            currentStep = 0;
+            userCash = 1000;
+            userShares = 0;
+
+            document.getElementById('current-year-display').innerText = 'נקודת ההתחלה (שנה 0)';
+            document.getElementById('current-price-display').innerText = '100.00 ₪';
+            document.getElementById('news-headline').innerText = yearsData[0].news;
+            document.getElementById('change-tag').className = "inline-block text-xs font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-300";
+            document.getElementById('change-tag').innerText = "שינוי בשנה זו: 0%";
+            document.getElementById('trade-msg').innerText = "";
+            document.getElementById('summary-banner').classList.add('hidden');
+
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            chart.data.labels = ['שנה 0'];
+            chart.data.datasets[0].data = [100];
+            chart.data.datasets[0].borderColor = '#6366f1';
+            chart.update();
+
+            updatePortfolioDisplay();
+        }
+
+        window.onload = function() {
+            initChart();
+            updatePortfolioDisplay();
+        };
+    </script>
+</body>
+</html>
